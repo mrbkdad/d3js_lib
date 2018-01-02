@@ -1,0 +1,145 @@
+<!doctype html>
+<html>
+  <meta charset="utf-8">
+  <head>
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <script src="/javascripts/myd3_lib.js"></script>
+    <style type='text/css'>
+      g.tick line{
+        shape-rendering: crispEdges;
+        stroke: #000;
+        stroke-dasharray: 2;
+      }
+      path.domain{
+        fill: none;
+        stroke: black;
+      }
+      g.box line{
+        stroke: black;
+        stroke-width: 2.5px;
+      }
+    </style>
+    <script type='text/javascript'>
+      var plotData = [];
+
+      d3.csv('/data/boxplot.csv',(err,data)=>{
+        data.forEach((d)=>{
+          plotData.push(d);
+        });
+        console.log(plotData);
+
+        var w = 500;
+        var h = 500;
+        var p = 30;
+        d3.select('svg').style('width',w).style('height',h);
+        var xExtent = d3.extent(plotData,(d)=>{
+          return d.day;
+        });
+        var yExtent = d3.extent(plotData,(d)=>{
+          return d.median;
+        });
+
+        xExtent = [1,8];
+        yExtent = [0,100];
+        var xScale = d3.scaleLinear().domain(xExtent).range([p,w-p]);
+        var yScale = d3.scaleLinear().domain(yExtent).range([h-p,p]);
+
+        var xAxis = d3.axisBottom().scale(xScale).tickSize(-h+2*p)
+                      .tickValues([1,2,3,4,5,6,7]);//.ticks(7);
+        var yAxis = d3.axisRight().scale(yScale).ticks(16).tickSize(-w+p);
+        //axis
+        d3.select('svg').append('g').attr('id','xAxisG').call(xAxis)
+        .attr('transform','translate(0,'+(h-p)+')');
+        d3.select('svg').append('g').attr('id','yAxisG').call(yAxis)
+        .attr('transform','translate('+(w-p)+',0)');
+
+        d3.select('svg').selectAll('circle.median')
+          .data(plotData).enter()
+          .append('circle').attr('class','tweets')
+          .attr('r',5)
+          .attr('cx',(d)=>{return xScale(d.day);})
+          .attr('cy',(d)=>{return yScale(d.median)})
+          .style('fill','darkgray');
+
+        d3.select('svg').selectAll('g.box')
+          .data(plotData).enter()
+          .append('g').attr('class','box')
+          .attr('transform',(d)=>{
+            return 'translate('+xScale(d.day)+','+yScale(d.median)+')';
+          }).each((d,i,n)=>{// n - node list
+            //console.log(n);
+            var bax_data = {
+              min:yScale(d.min),
+              max:yScale(d.max),
+              median:yScale(d.median),
+              q1:yScale(d.q1),
+              q3:yScale(d.q3)
+            }
+            draw_one_box_plot(d3.select(n[i]),bax_data);
+            /*
+            //range line
+            d3.select(n[i]).append('line').attr('class','range')
+              .attr('x1',0).attr('x2',0)
+              .attr('y1',yScale(d.max)-yScale(d.median))
+              .attr('y2',yScale(d.min)-yScale(d.median));
+            //Max, Min line
+            d3.select(n[i]).append('line').attr('class','max')
+              .attr('x1',-10).attr('x2',10)
+              .attr('y1',yScale(d.max)-yScale(d.median))
+              .attr('y2',yScale(d.max)-yScale(d.median));
+            d3.select(n[i]).append('line').attr('class','min')
+              .attr('x1',-10).attr('x2',10)
+              .attr('y1',yScale(d.min)-yScale(d.median))
+              .attr('y2',yScale(d.min)-yScale(d.median));
+            //quantile box
+            d3.select(n[i]).append('rect').attr('width',20)
+              .attr('x',-10)
+              .attr('y',yScale(d.q3)-yScale(d.median))
+              .attr('height',yScale(d.q1)-yScale(d.q3))
+              .attr('fill','lightgray').style('stroke','black')
+              .style('opacity',0.9);
+            //median line
+            d3.select(n[i]).append('line').attr('class','min')
+              .attr('x1',-10).attr('x2',10)
+              .attr('y1',0).attr('y2',0)
+              .style('stroke','gray').style('stroke-width','4px');
+          */
+          });
+      })
+
+
+      function draw_one_box_plot(p,d){
+        // data structure : max,min,median,q1,q3
+        p.append('line').attr('class','range')
+          .attr('x1',0).attr('x2',0)
+          .attr('y1',d.max-d.median)
+          .attr('y2',d.min-d.median);
+        //Max, Min line
+        p.append('line').attr('class','max')
+          .attr('x1',-10).attr('x2',10)
+          .attr('y1',d.max-d.median)
+          .attr('y2',d.max-d.median);
+        p.append('line').attr('class','min')
+          .attr('x1',-10).attr('x2',10)
+          .attr('y1',d.min-d.median)
+          .attr('y2',d.min-d.median);
+        //quantile box
+        p.append('rect').attr('width',20)
+          .attr('x',-10)
+          .attr('y',d.q3-d.median)
+          .attr('height',d.q1-d.q3)
+          .attr('fill','lightgray').style('stroke','black')
+          .style('opacity',0.9);
+        //median line
+        p.append('line').attr('class','min')
+          .attr('x1',-10).attr('x2',10)
+          .attr('y1',0).attr('y2',0)
+          .style('stroke','gray').style('stroke-width','4px');
+
+      }
+    </script>
+  </head>
+  <body>
+    <svg id='boxplot' style="border:1px lightgray solid;"/>
+  </body>
+  </html>

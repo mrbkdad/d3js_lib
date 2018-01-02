@@ -1,0 +1,14 @@
+extends layout
+
+block content
+  h1= title
+  p Welcome to #{title}
+  div
+    ul#d3js_page
+  script(src="https://d3js.org/d3.v4.min.js")
+  script.
+    d3.json("http://10.223.122.105:8080/dir",(err,data)=>{
+      d3.select('#d3js_page').selectAll('li').data(data).enter()
+        .append('li').append('a').attr('href',(d)=>{return d;})
+        .text((d)=>{return d;});
+    });

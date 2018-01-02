@@ -1,0 +1,40 @@
+<!doctype html>
+<html>
+  <meta charset="utf-8">
+  <head>
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <script src="/javascripts/myd3_lib.js"></script>
+    <style type='text/css'>
+      line{
+        shape-rendering: crispEdges;
+        stroke: #000;
+        stroke-dasharray: 5;
+      }
+      path.domain{
+        fill: none;
+        stroke: black;
+      }
+    </style>
+  </head>
+  <body>
+    <svg style="border:1px lightgray solid;"/>
+    <script type="text/javascript">
+    var plotData = {
+      width:500,
+      height:500,
+      pad:30,
+      r:5,
+      data:[
+        {x:5,y:22000},
+        {x:3,y:18000},
+        {x:10,y:88000},
+        {x:0,y:180000},
+        {x:27,y:56000},
+        {x:8,y:74000}
+      ]
+    };
+
+    scatter(plotData,d3.select('svg'))
+    </script>
+  </body>
+  </html>
