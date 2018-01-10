@@ -245,7 +245,7 @@ style : user preference => css
 
 lineplot(d,p) : draw line plot
 */
-function lineplot(data,parrent=null){
+function lineplot(data,line_tp=0,parrent=null){
   //extent, scale, axis
   var xExtent = d3.extent(data.data,(d)=>{
     return d.x;
@@ -288,10 +288,15 @@ function lineplot(data,parrent=null){
       return yScale(d.y);
     }).style('fill',(d,i)=>{ return d.c;});
 
+  //interpolate
+  var interpolate_tp = [d3.curveLinear,d3.curveStepBefore,d3.curveStepAfter,d3.curveBasis,
+    d3.curveBasisOpen, d3.curveBasisClosed, d3.curveBundle,d3.curveCardinal,d3.curveCardinal,
+    d3.curveCardinalOpen,d3.curveCardinalClosed,d3.curveNatural];
   //line
   var line = d3.line()
     .x((d)=>{ return xScale(d.x)})
-    .y((d)=>{ return yScale(d.y)});
+    .y((d)=>{ return yScale(d.y)})
+    .curve(interpolate_tp[line_tp]);
   for(let i in data.lc){
     svg.append('path')
       .attr('d',line(data.data.filter((d)=>{return d.line==i;})))
